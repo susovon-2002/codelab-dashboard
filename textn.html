@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CodeLab Dashboard – Encoders & Crypto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root {
+    --bg: #020617;
+    --bg-soft: #020617;
+    --panel: #020617;
+    --panel-soft: #020617;
+    --border: #1f2937;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56,189,248,0.1);
+    --text-main: #e5e7eb;
+    --text-muted: #9ca3af;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+    color: var(--text-main);
+  }
+  .app {
+    display: flex;
+    min-height: 100vh;
+  }
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: rgba(15,23,42,0.98);
+    border-right: 1px solid var(--border);
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    background: radial-gradient(circle, #38bdf8, #0ea5e9, #0369a1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+    color: #0b1220;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+  }
+  .brand-text span:first-child {
+    font-weight: 600;
+  }
+  .nav-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    margin-top: 4px;
+  }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav button {
+    all: unset;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav button span.icon {
+    width: 18px;
+    text-align: center;
+  }
+  .nav button.active,
+  .nav button:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+
+  /* Main */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(15,23,42,0.9);
+    backdrop-filter: blur(10px);
+  }
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .topbar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .topbar-right {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .content {
+    padding: 18px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panels {
+    display: grid;
+    grid-template-columns: minmax(0, 2.3fr) minmax(0, 1.7fr);
+    gap: 16px;
+  }
+
+  .panel {
+    background: rgba(15,23,42,0.95);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 14px 16px 16px;
+  }
+  .panel-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .panel-badge {
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius:999px;
+    padding:3px 8px;
+  }
+  .panel-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom:8px;
+  }
+  textarea {
+    width:100%;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background: #020617;
+    color: var(--text-main);
+    resize: vertical;
+    min-height: 140px;
+    font-family: "Consolas","Fira Code",monospace;
+    font-size: 12px;
+    padding: 8px 9px;
+  }
+  textarea:focus {
+    outline:none;
+    border-color: var(--accent);
+    box-shadow:0 0 0 1px var(--accent-soft);
+  }
+
+  select {
+    width:100%;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#020617;
+    color:var(--text-main);
+    padding:6px 9px;
+    font-size:12px;
+    margin-top:6px;
+  }
+  .control-row {
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  button.action-btn {
+    border:none;
+    border-radius:999px;
+    background:var(--accent);
+    color:#020617;
+    font-size:12px;
+    padding:7px 14px;
+    cursor:pointer;
+    font-weight:500;
+  }
+  button.action-btn.secondary {
+    background:#111827;
+    color:var(--text-main);
+  }
+  button.action-btn:hover {
+    filter:brightness(1.08);
+  }
+  .hint {
+    font-size:11px;
+    color:var(--text-muted);
+    margin-top:6px;
+  }
+  .tagline {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .visual-box {
+    background:#020617;
+    border-radius:10px;
+    border:1px solid var(--border);
+    padding:10px;
+    min-height:200px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  #qrcode {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:120px;
+  }
+  #binImage {
+    border-radius:6px;
+    border:1px solid #111827;
+    max-width:100%;
+  }
+  @media(max-width: 900px) {
+    .app {
+      flex-direction: column;
+    }
+    .sidebar {
+      width:100%;
+      flex-direction:row;
+      flex-wrap:wrap;
+      border-right:none;
+      border-bottom:1px solid var(--border);
+      gap:8px;
+    }
+    .sidebar-footer { display:none; }
+    .main { flex:1; }
+    .panels {
+      grid-template-columns: minmax(0,1fr);
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">C</div>
+      <div class="brand-text">
+        <span>CodeLab Dashboard</span>
+        <span>Encoders • Crypto • QR</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-section-title">Workspace</div>
+      <div class="nav">
+        <button class="nav-item active" data-group="all">
+          <span class="icon">🏠</span> All Tools
+        </button>
+        <button class="nav-item" data-group="text">
+          <span class="icon">✏️</span> Text & Coding
+        </button>
+        <button class="nav-item" data-group="numbers">
+          <span class="icon">#</span> Numbers & Base
+        </button>
+        <button class="nav-item" data-group="hash">
+          <span class="icon">🔐</span> Hash & Crypto
+        </button>
+        <button class="nav-item" data-group="visual">
+          <span class="icon">🧩</span> QR & Visual
+        </button>
+        <button class="nav-item" data-group="stego">
+          <span class="icon">🕵️</span> Stego & AES
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      Built as a universal conversion lab.<br/>
+      Works fully in browser.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="topbar-title">Universal Encoder & Crypto Lab</div>
+        <div class="topbar-sub">
+          Choose a category in the sidebar, then select a tool and click Convert.
+        </div>
+      </div>
+      <div class="topbar-right">
+        Client-side only · No data leaves your browser
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="panels">
+        <!-- Left: Input + Mode + Output -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Input & Tool Selection</div>
+            <div class="panel-badge" id="activeGroupLabel">All Tools</div>
+          </div>
+          <div class="panel-sub">
+            Type your text/code, pick a conversion mode, then hit Convert.
+          </div>
+
+          <textarea id="input" placeholder="Type text or code here..."></textarea>
+
+          <label class="section-title" style="font-size:12px;margin-top:10px;display:block;">
+            Conversion Mode
+          </label>
+          <select id="mode">
+            <!-- options will be injected by JS -->
+          </select>
+
+          <div class="control-row">
+            <button class="action-btn" onclick="convert()">Convert</button>
+            <button class="action-btn secondary" onclick="clearIO()">Clear</button>
+          </div>
+          <div class="hint">
+            <b>Base-N</b> input: <code>value,fromBase,toBase</code> (e.g. <code>FF,16,2</code>).  
+            <b>Stego Hide</b>: <code>cover text || secret message</code>.
+          </div>
+        </div>
+
+        <!-- Right: Output + Visuals -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Output & Visual Preview</div>
+            <div class="panel-badge">Live</div>
+          </div>
+          <div class="panel-sub">
+            Encoded/decoded result will appear below. Some tools also render visual previews.
+          </div>
+
+          <textarea id="output" readonly placeholder="Output will appear here..."></textarea>
+
+          <div class="visual-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="tagline">QR / Binary Image Preview</span>
+              <span style="font-size:11px;color:var(--text-muted);">
+                Used by QR, Binary Image tools
+              </span>
+            </div>
+            <div id="qrcode"></div>
+            <canvas id="binImage" width="0" height="0"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// -------- Mode definitions + grouping --------
+const MODES = [
+  // group, label, value
+  ["text",   "Text → Binary",        "text-to-binary"],
+  ["text",   "Binary → Text",        "binary-to-text"],
+  ["text",   "Text → Octal",         "text-to-octal"],
+  ["text",   "Octal → Text",         "octal-to-text"],
+  ["text",   "Text → Hex",           "text-to-hex"],
+  ["text",   "Hex → Text",           "hex-to-text"],
+  ["text",   "Text → Base64",        "text-to-base64"],
+  ["text",   "Base64 → Text",        "base64-to-text"],
+  ["text",   "Text → Morse",         "text-to-morse"],
+  ["text",   "Morse → Text",         "morse-to-text"],
+  ["text",   "ROT13",                "rot13"],
+  ["text",   "Reverse Text",         "reverse-text"],
+
+  ["numbers","Base-N: value,from,to","base-n"],
+
+  ["hash",   "MD5 Hash",             "md5"],
+  ["hash",   "SHA-1 Hash",           "sha1"],
+  ["hash",   "SHA-256 Hash",         "sha256"],
+  ["hash",   "SHA-512 Hash",         "sha512"],
+  ["hash",   "Caesar Cipher (+3)",   "caesar"],
+  ["hash",   "Atbash Cipher",        "atbash"],
+  ["hash",   "Vigenère Cipher",      "vigenere"],
+
+  ["hash",   "URL Encode",           "url-encode"],
+  ["hash",   "URL Decode",           "url-decode"],
+  ["hash",   "HTML Encode",          "html-encode"],
+  ["hash",   "HTML Decode",          "html-decode"],
+  ["hash",   "JSON Escape",          "json-escape"],
+  ["hash",   "JSON Unescape",        "json-unescape"],
+
+  ["visual", "Emoji Encode (😀/😈)", "emoji-encode"],
+  ["visual", "Emoji Decode",         "emoji-decode"],
+  ["visual", "QR Code (Text → QR)",  "qr-generate"],
+  ["visual", "Binary Image (Text → Pixels)", "binary-image"],
+
+  ["stego",  "Stego: Hide in Text",  "steg-hide"],
+  ["stego",  "Stego: Reveal from Text", "steg-reveal"],
+  ["stego",  "AES-256 Encrypt",      "aes-encrypt"],
+  ["stego",  "AES-256 Decrypt",      "aes-decrypt"],
+];
+
+const groupLabelMap = {
+  all: "All Tools",
+  text: "Text & Coding",
+  numbers: "Numbers & Base",
+  hash: "Hash & Crypto",
+  visual: "QR & Visual",
+  stego: "Stego & AES"
+};
+
+function populateModes(group = "all") {
+  const modeSelect = document.getElementById("mode");
+  modeSelect.innerHTML = "";
+  MODES.forEach(([g,label,val]) => {
+    if (group === "all" || g === group) {
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = label;
+      modeSelect.appendChild(opt);
+    }
+  });
+}
+
+// Sidebar navigation handling
+document.querySelectorAll(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const group = btn.getAttribute("data-group");
+    populateModes(group);
+    document.getElementById("activeGroupLabel").textContent = groupLabelMap[group] || "All Tools";
+  });
+});
+
+// Initialize with "All Tools"
+populateModes("all");
+
+// ---- Morse ----
+const MORSE = {
+  'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....',
+  'I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.',
+  'Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-',
+  'Y':'-.--','Z':'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-',
+  '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',' ':'/'
+};
+const REVERSE_MORSE = {};
+for (let k in MORSE) REVERSE_MORSE[MORSE[k]] = k;
+
+// Emoji bits
+const EMO0 = "😀";
+const EMO1 = "😈";
+
+// Async hash helper
+async function hashText(text, algo) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest(algo, enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+function clearVisuals() {
+  document.getElementById("qrcode").innerHTML = "";
+  const c = document.getElementById("binImage");
+  const ctx = c.getContext("2d");
+  c.width = 0; c.height = 0;
+  ctx.clearRect(0,0,c.width,c.height);
+}
+
+function clearIO() {
+  document.getElementById("input").value = "";
+  document.getElementById("output").value = "";
+  clearVisuals();
+}
+
+// ------------- MAIN CONVERTER -------------
+function convert() {
+  const input = document.getElementById("input").value;
+  const mode = document.getElementById("mode").value;
+  const outEl = document.getElementById("output");
+  clearVisuals();
+
+  let out = "";
+
+  switch(mode) {
+    // basic encodings
+    case "text-to-binary":
+      out = [...input].map(c=>c.charCodeAt(0).toString(2).padStart(8,"0")).join(" ");
+      break;
+    case "binary-to-text":
+      out = input.trim().split(/\s+/).map(b=>String.fromCharCode(parseInt(b,2)||0)).join("");
+      break;
+    case "text-to-octal":
+      out = [...input].map(c=>c.charCodeAt(0).toString(8)).join(" ");
+      break;
+    case "octal-to-text":
+      out = input.trim().split(/\s+/).map(o=>String.fromCharCode(parseInt(o,8)||0)).join("");
+      break;
+    case "text-to-hex":
+      out = [...input].map(c=>c.charCodeAt(0).toString(16)).join(" ");
+      break;
+    case "hex-to-text":
+      out = input.trim().split(/\s+/).map(h=>String.fromCharCode(parseInt(h,16)||0)).join("");
+      break;
+    case "text-to-base64":
+      out = btoa(input);
+      break;
+    case "base64-to-text":
+      out = atob(input);
+      break;
+    case "text-to-morse":
+      out = input.toUpperCase().split("").map(c=>MORSE[c]||"").join(" ");
+      break;
+    case "morse-to-text":
+      out = input.trim().split(/\s+/).map(m=>REVERSE_MORSE[m]||"").join("");
+      break;
+    case "rot13":
+      out = input.replace(/[a-zA-Z]/g, c =>
+        String.fromCharCode(
+          (c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26
+        )
+      );
+      break;
+    case "reverse-text":
+      out = input.split("").reverse().join("");
+      break;
+
+    // base-n
+    case "base-n":
+      {
+        const parts = input.split(",");
+        if (parts.length !== 3) { out = "Use: value,fromBase,toBase (e.g. FF,16,2)"; break; }
+        const [v, fb, tb] = parts.map(s=>s.trim());
+        const from = parseInt(fb,10), to = parseInt(tb,10);
+        const num = parseInt(v, from);
+        out = isNaN(num) ? "Invalid number/base." : num.toString(to);
+      }
+      break;
+
+    // ciphers
+    case "caesar":
+      out = input.replace(/[a-z]/gi, c =>
+        String.fromCharCode(
+          (c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 3) ? c : c - 26
+        )
+      );
+      break;
+    case "atbash":
+      out = input.replace(/[a-zA-Z]/g, c =>
+        String.fromCharCode((c <= "Z" ? 155 : 219) - c.charCodeAt(0))
+      );
+      break;
+    case "vigenere":
+      {
+        const key = prompt("Enter Vigenère key:") || "";
+        if (!key) { out = "No key provided."; break; }
+        let j=0; out="";
+        for (let i=0;i<input.length;i++) {
+          const ch = input[i];
+          if (/[a-zA-Z]/.test(ch)) {
+            const base = ch === ch.toUpperCase() ? 65 : 97;
+            const k = key[j % key.length].toLowerCase().charCodeAt(0) - 97;
+            out += String.fromCharCode((ch.charCodeAt(0)-base+k+26)%26 + base);
+            j++;
+          } else out += ch;
+        }
+      }
+      break;
+
+    // hashes
+    case "md5":
+      out = CryptoJS.MD5(input).toString();
+      break;
+    case "sha1":
+      hashText(input,"SHA-1").then(r=>outEl.value=r);
+      return;
+    case "sha256":
+      hashText(input,"SHA-256").then(r=>outEl.value=r);
+      return;
+    case "sha512":
+      hashText(input,"SHA-512").then(r=>outEl.value=r);
+      return;
+
+    // web encodings
+    case "url-encode":
+      out = encodeURIComponent(input);
+      break;
+    case "url-decode":
+      out = decodeURIComponent(input);
+      break;
+    case "html-encode":
+      out = input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      break;
+    case "html-decode":
+      out = input.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&");
+      break;
+    case "json-escape":
+      out = JSON.stringify(input);
+      break;
+    case "json-unescape":
+      try { out = JSON.parse(input); } catch(e){ out = "Invalid JSON-escaped string."; }
+      break;
+
+    // emoji
+    case "emoji-encode":
+      {
+        const bits = [...input]
+          .map(c=>c.charCodeAt(0).toString(2).padStart(8,"0"))
+          .join("");
+        out = bits.split("").map(b=>b==="1"?EMO1:EMO0).join("");
+      }
+      break;
+    case "emoji-decode":
+      {
+        const bits = [...input].map(e=>e===EMO1?"1":"0").join("");
+        const chunks = bits.match(/.{8}/g) || [];
+        out = chunks.map(b=>String.fromCharCode(parseInt(b,2)||0)).join("");
+      }
+      break;
+
+    // QR
+    case "qr-generate":
+      if (!input.trim()) { out = "Enter some text to generate QR."; break; }
+      out = "QR code generated in the preview box.";
+      new QRCode(document.getElementById("qrcode"), {
+        text: input,
+        width: 160,
+        height: 160
+      });
+      break;
+
+    // binary image
+    case "binary-image":
+      if (!input) { out = "Enter some text first."; break; }
+      {
+        const bits = [...input]
+          .map(c=>c.charCodeAt(0).toString(2).padStart(8,"0"))
+          .join("");
+        const canvas = document.getElementById("binImage");
+        const ctx = canvas.getContext("2d");
+        const size = Math.ceil(Math.sqrt(bits.length));
+        const cell = 6;
+        canvas.width = size*cell;
+        canvas.height = size*cell;
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        for (let i=0;i<bits.length;i++) {
+          const x = (i % size)*cell;
+          const y = Math.floor(i/size)*cell;
+          ctx.fillStyle = bits[i]==="1" ? "#ffffff" : "#111827";
+          ctx.fillRect(x,y,cell,cell);
+        }
+        out = "Binary pixel image rendered in preview.";
+      }
+      break;
+
+    // stego
+    case "steg-hide":
+      {
+        const parts = input.split("||");
+        if (parts.length < 2) { out = "Use: cover text || secret message"; break; }
+        const cover = parts[0];
+        const secret = parts.slice(1).join("||");
+        const bits = [...secret]
+          .map(c=>c.charCodeAt(0).toString(2).padStart(8,"0"))
+          .join("");
+        const ZW0 = "\u200B";
+        const ZW1 = "\u200C";
+        const encoded = bits.split("").map(b=>b==="1"?ZW1:ZW0).join("");
+        out = cover + encoded;
+      }
+      break;
+    case "steg-reveal":
+      {
+        const ZW0 = "\u200B";
+        const ZW1 = "\u200C";
+        const hidden = input.match(/[\u200B\u200C]+/g);
+        if (!hidden) { out = "No hidden data found."; break; }
+        const bits = hidden.join("").split("").map(ch=>ch===ZW1?"1":"0").join("");
+        const chunks = bits.match(/.{8}/g) || [];
+        out = chunks.map(b=>String.fromCharCode(parseInt(b,2)||0)).join("");
+      }
+      break;
+
+    // AES
+    case "aes-encrypt":
+      {
+        const pass = prompt("Password for AES-256 encryption:") || "";
+        if (!pass) { out = "No password provided."; break; }
+        out = CryptoJS.AES.encrypt(input, pass).toString();
+      }
+      break;
+    case "aes-decrypt":
+      {
+        const pass = prompt("Password for AES-256 decryption:") || "";
+        if (!pass) { out = "No password provided."; break; }
+        try {
+          const bytes = CryptoJS.AES.decrypt(input, pass);
+          out = bytes.toString(CryptoJS.enc.Utf8) || "Invalid password or ciphertext.";
+        } catch(e) {
+          out = "Decryption failed.";
+        }
+      }
+      break;
+  }
+
+  outEl.value = out;
+}
+</script>
+
+<!-- CryptoJS for MD5 + AES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<!-- QRCode.js for QR generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>
+
+
+
+
